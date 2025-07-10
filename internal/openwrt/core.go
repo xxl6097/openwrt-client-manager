@@ -35,14 +35,14 @@ type Status struct {
 }
 
 type DHCPLease struct {
-	IP         string    `json:"ip"`  //DHCP 服务器分配给客户端的 IP
-	MAC        string    `json:"mac"` //设备的物理地址，格式为 xx:xx:xx:xx:xx:xx
-	Phy        string    `json:"phy"`
-	Hostname   string    `json:"hostname"` //客户端上报的主机名（可能为空或 *）
-	NickName   string    `json:"nickName"` //
-	StartTime  string    `json:"starTime"` //租约失效的精确时间（秒级精度）
-	Online     bool      `json:"online"`
-	StatusList []*Status `json:"statusList"`
+	IP        string `json:"ip"`  //DHCP 服务器分配给客户端的 IP
+	MAC       string `json:"mac"` //设备的物理地址，格式为 xx:xx:xx:xx:xx:xx
+	Phy       string `json:"phy"`
+	Hostname  string `json:"hostname"` //客户端上报的主机名（可能为空或 *）
+	NickName  string `json:"nickName"` //
+	StartTime string `json:"starTime"` //租约失效的精确时间（秒级精度）
+	Online    bool   `json:"online"`
+	//StatusList []*Status `json:"statusList"`
 }
 type ARPEntry struct {
 	IP        net.IP           //设备的 IPv4 地址

@@ -56,26 +56,6 @@
             <template #default="props">
               <ViewExpand :row="props.row" />
             </template>
-            <!--            <template #default="props">-->
-            <!--              <div m="4">-->
-            <!--                <p m="t-0 b-2">接口: {{ props.row.phy }}</p>-->
-            <!--                            <el-timeline style="max-width: 200px">-->
-            <!--                              <el-timeline-item-->
-            <!--                                v-for="(activity, index) in props.row.statusList"-->
-            <!--                                :key="index"-->
-            <!--                                :color="activity.connected ? '#55f604' : 'red'"-->
-            <!--                                :hollow="false"-->
-            <!--                                :timestamp="activity.timestamp"-->
-            <!--                              >-->
-            <!--                                <span-->
-            <!--                                  :style="{ color: activity.connected ? '#55f604' : 'red' }"-->
-            <!--                                >-->
-            <!--                                  {{ activity.connected ? '在线' : '离线' }}-->
-            <!--                                </span>-->
-            <!--                              </el-timeline-item>-->
-            <!--                            </el-timeline>-->
-            <!--              </div>-->
-            <!--            </template>-->
           </el-table-column>
           <el-table-column prop="hostname" label="名称" sortable>
             <template #default="scope">

@@ -170,11 +170,10 @@ func (this *openWRT) updateClientStatusList(macAddr string, timestamp string, st
 
 func (this *openWRT) updateClientsBySysLog(timestamp string, macAddr string, phy string, status bool) {
 	if cls, ok := this.clients[macAddr]; ok {
-		cls.StatusList = append(cls.StatusList, &Status{
-			Timestamp: timestamp,
-			Connected: status,
-			//MAC:       macAddr,
-		})
+		//cls.StatusList = append(cls.StatusList, &Status{
+		//	Timestamp: timestamp,
+		//	Connected: status,
+		//})
 		cls.Online = status
 		cls.Phy = phy
 		if this.fnWatcher != nil {
@@ -284,8 +283,9 @@ func (this *openWRT) getClientsFromDHCPAndArpAndSysLogAndNick() (map[string]*DHC
 				}
 			}
 			if e3 == nil {
-				item.StatusList = status[mac]
-				_ = setStatusByMac(mac, item.StatusList)
+				//item.StatusList = status[mac]
+				list := status[mac]
+				_ = setStatusByMac(mac, list)
 			}
 			if e4 == nil {
 				if nick, ok := nicks[mac]; ok {

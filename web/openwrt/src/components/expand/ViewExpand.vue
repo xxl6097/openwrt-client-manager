@@ -11,19 +11,19 @@
       </el-form-item>
     </el-form>
 
-    <el-timeline style="max-width: 200px">
-      <el-timeline-item
-        v-for="(activity, index) in row.statusList"
-        :key="index"
-        :color="activity.connected ? '#55f604' : 'red'"
-        :hollow="false"
-        :timestamp="activity.timestamp"
-      >
-        <span :style="{ color: activity.connected ? '#55f604' : 'red' }">
-          {{ activity.connected ? '在线' : '离线' }}
-        </span>
-      </el-timeline-item>
-    </el-timeline>
+    <!--    <el-timeline style="max-width: 200px">-->
+    <!--      <el-timeline-item-->
+    <!--        v-for="(activity, index) in row.statusList"-->
+    <!--        :key="index"-->
+    <!--        :color="activity.connected ? '#55f604' : 'red'"-->
+    <!--        :hollow="false"-->
+    <!--        :timestamp="activity.timestamp"-->
+    <!--      >-->
+    <!--        <span :style="{ color: activity.connected ? '#55f604' : 'red' }">-->
+    <!--          {{ activity.connected ? '在线' : '离线' }}-->
+    <!--        </span>-->
+    <!--      </el-timeline-item>-->
+    <!--    </el-timeline>-->
   </div>
 </template>
 

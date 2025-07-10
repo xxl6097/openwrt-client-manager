@@ -27,7 +27,7 @@ func (this *ApiRoute) Setup(router *mux.Router) {
 	})
 	httpserver.RouterUtil.AddHandleFunc(router, ihttpserver.ApiModel{
 		Method: http.MethodGet,
-		Path:   "/get/status",
+		Path:   "/api/get/status",
 		Fun:    this.restApi.GetStatus,
 		NoAuth: false,
 	})

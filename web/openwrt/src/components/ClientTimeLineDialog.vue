@@ -28,17 +28,40 @@
 <script setup lang="ts">
 import { ref, defineExpose } from 'vue'
 import { Client, Status } from '../utils/type.ts'
+import { showErrorTips, showTips } from '../utils/utils.ts'
 
 const showClientDialog = ref(false)
 const title = ref<string>()
 
 const activities = ref<Status[]>([])
 
+function fetchData(mac: string) {
+  fetch(`../api/get/status?mac=${mac}`, {
+    credentials: 'include',
+    method: 'GET',
+  })
+    .then((res) => res.json())
+    .then((json) => {
+      console.log('get/status', json)
+      if (json && json.code === 0 && json.data) {
+        console.log(json)
+        showClientDialog.value = true
+        activities.value = json.data
+      } else {
+        showTips(json.code, json.msg)
+      }
+    })
+    .catch(() => {
+      showErrorTips('获取失败')
+    })
+}
+
 const openClientDetailDialog = (row: Client) => {
   console.log('打开对话框，row:', row)
   title.value = `客户端【${row.hostname}】状态时间表`
-  showClientDialog.value = true
-  activities.value = row.statusList
+  // showClientDialog.value = true
+  // activities.value = row.statusList
+  fetchData(row.mac)
 }
 
 // 暴露方法供父组件调用
