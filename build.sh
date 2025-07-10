@@ -5,7 +5,7 @@ options=("windows:amd64" "windows:arm64" "linux:amd64" "linux:arm64" "linux:arm:
 #options=("linux:amd64" "windows:amd64")
 version=$(git tag -l "v[0-99]*.[0-99]*.[0-99]*" --sort=-creatordate | head -n 1)
 versionDir="$module/pkg"
-appname="aatest"
+appname="uclient"
 root=./cmd
 
 function writeVersionGoFile() {
@@ -111,6 +111,7 @@ function buildgo() {
   filename=$(basename "$dstFilePath")
   binName="-X '${versionDir}.BinName=${filename}'"
   #echo "--->env CGO_ENABLED=0 GOOS=${os} GOARCH=${arch} ${flags} go build -trimpath -ldflags "$ldflags $binName -linkmode internal" -o ${dstFilePath} ${appdir}"
+  echo "--->${ldflags}"
   env CGO_ENABLED=0 GOOS=${os} GOARCH=${arch} ${flags} go build -trimpath -ldflags "$ldflags $binName -linkmode internal" -o ${dstFilePath} ${appdir}
   if [ "${os}" = "windows" ] ; then
     if [ "${arch}" = "amd64" ]; then
@@ -322,19 +323,12 @@ function install() {
 
 # shellcheck disable=SC2120
 function githubActions() {
-#  oldFile="./temp/sample.old"
-#  newFile="./temp/sample.new"
-#  patFile="./temp/sample.patch"
-#  bsdiff ${oldFile} ${newFile} ${patFile}
-#  ls -lh ./temp
   builddir="./release"
 #  appname="srvinstaller"
-  appdir="./cmd/app/app"
+  appdir="./cmd/service"
   disname="${appname}应用程序"
   describe="一款基于GO语言的服务安装程序"
   echo "===>version:${version}"
-  go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-  go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
   rm -rf ${builddir}
   buildAll $builddir $appname "$version" $appdir $disname $describe
   mkdir -p ./release/packages

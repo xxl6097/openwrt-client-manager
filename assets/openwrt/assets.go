@@ -1,61 +1,40 @@
-// Copyright 2016 fatedier, fatedier@gmail.com
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package assets
 
 import (
+	"e.coding.net/clife-devops/devp/go-http/pkg/httpserver"
+	"e.coding.net/clife-devops/devp/go-http/pkg/ihttpserver"
+	"e.coding.net/clife-devops/devp/go-http/pkg/util"
 	"embed"
+	"github.com/gorilla/mux"
+	"github.com/xxl6097/glog/glog"
 	"io/fs"
 	"net/http"
 )
 
-var (
-	// read-only filesystem created by "embed" for embedded files
-	content    fs.FS
-	FileSystem http.FileSystem
-	// if prefix is not empty, we get file content from disk
-	prefixPath string
-)
-
 //go:embed static/*
-var AssetsHml embed.FS
+var StaticFS embed.FS
+var FileSystem http.FileSystem
 
 func init() {
-	Register(AssetsHml)
+	subFs, err := fs.Sub(StaticFS, "static")
+	if err != nil {
+		glog.Fatal("静态资源加载失败", err)
+	}
+	FileSystem = http.FS(subFs)
 }
 
-// Load if path is empty, load assets in memory
-// or set FileSystem using disk files
-func Load(path string) {
-	prefixPath = path
-	if prefixPath != "" {
-		FileSystem = http.Dir(prefixPath)
-	} else {
-		FileSystem = http.FS(content)
-	}
+type StaticRoute struct {
 }
 
-func RegisterPath(fileSystem fs.FS, path string) {
-	subFs, err := fs.Sub(fileSystem, path)
-	if err == nil {
-		content = subFs
-	}
+func (s StaticRoute) Setup(router *mux.Router) {
+	httpserver.RouterUtil.AddNoAuthPrefix("/")
+	httpserver.RouterUtil.AddNoAuthPrefix("static")
+
+	router.Handle("/favicon.ico", http.FileServer(FileSystem)).Methods(http.MethodGet, http.MethodOptions)
+	router.PathPrefix("/").Handler(util.MakeHTTPGzipHandler(http.StripPrefix("/", http.FileServer(FileSystem)))).Methods(http.MethodGet, http.MethodOptions)
 }
 
-func Register(fileSystem fs.FS) {
-	subFs, err := fs.Sub(fileSystem, ".")
-	if err == nil {
-		content = subFs
-	}
+func NewRoute() ihttpserver.IRoute {
+	opt := &StaticRoute{}
+	return opt
 }

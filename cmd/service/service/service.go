@@ -1,4 +1,4 @@
-package serv
+package service
 
 import (
 	"e.coding.net/clife-devops/devp/go-http/pkg/httpserver"
@@ -6,12 +6,12 @@ import (
 	"github.com/kardianos/service"
 	"github.com/xxl6097/glog/glog"
 	_ "github.com/xxl6097/go-service/assets/buffer"
-	"github.com/xxl6097/go-service/pkg"
 	"github.com/xxl6097/go-service/pkg/gs/igs"
 	"github.com/xxl6097/go-service/pkg/ukey"
 	"github.com/xxl6097/go-service/pkg/utils"
 	assets "github.com/xxl6097/openwrt-client-manager/assets/openwrt"
 	"github.com/xxl6097/openwrt-client-manager/internal"
+	"github.com/xxl6097/openwrt-client-manager/pkg"
 	"os"
 )
 
@@ -46,10 +46,9 @@ func load() (*Config, error) {
 
 func (this *Service) OnConfig() *service.Config {
 	cfg := service.Config{
-		Name: pkg.AppName,
-		//UserName:    "root",
-		DisplayName: fmt.Sprintf("AA_%s", pkg.AppVersion),
-		Description: "A Golang AABus Service..",
+		Name:        pkg.AppName,
+		DisplayName: pkg.DisplayName,
+		Description: pkg.Description,
 	}
 	return &cfg
 }

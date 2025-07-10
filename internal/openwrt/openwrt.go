@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/xxl6097/glog/glog"
+	"github.com/xxl6097/openwrt-client-manager/internal/u"
 	"sort"
 	"strings"
 	"sync"
@@ -29,12 +30,19 @@ func GetInstance() *openWRT {
 		instance = &openWRT{
 			nickMap: make(map[string]*NickEntry),
 		}
-		instance.initClients()
-		go instance.initListenSysLog()
-		instance.initListenFsnotify()
+		instance.init()
 		glog.Println("Singleton instance created")
 	})
 	return instance
+}
+
+func (this *openWRT) init() {
+	if u.IsMacOs() {
+		return
+	}
+	this.initClients()
+	go this.initListenSysLog()
+	this.initListenFsnotify()
 }
 
 func (this *openWRT) initListenSysLog() {

@@ -155,7 +155,7 @@ func (s *SSEServer) run() {
 		case client := <-s.register:
 			s.mu.Lock()
 			s.clients[client.SseId] = client
-			glog.Debugf("register:%s,%p", client.SseId, s.callback)
+			glog.Debugf("register:%s", client.SseId)
 			if s.callback != nil {
 				s.callback.OnSseNewConnection(client)
 			}

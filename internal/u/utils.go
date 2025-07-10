@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 )
 
 func Error(code int, msg string) map[string]interface{} {
@@ -72,4 +74,11 @@ func ClearTemp() error {
 		}
 	}
 	return err
+}
+
+func IsMacOs() bool {
+	if strings.Compare(runtime.GOOS, "darwin") == 0 {
+		return true
+	}
+	return false
 }
