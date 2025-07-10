@@ -213,7 +213,7 @@ const toggleDark = useToggle(isDark)
 const source = ref<EventAwareSSEClient | null>()
 // 搜索关键字
 const searchKeyword = ref<string>('')
-const pageSize = ref<number>(10)
+const pageSize = ref<number>(50)
 const currentPage = ref<number>(1)
 const tableData = ref<Client[]>([])
 // 分页后的表格数
