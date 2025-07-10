@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/xxl6097/glog/glog"
+	"github.com/xxl6097/go-service/pkg/github"
 	"github.com/xxl6097/go-service/pkg/gs/igs"
 	"github.com/xxl6097/openwrt-client-manager/internal/iface"
 	"github.com/xxl6097/openwrt-client-manager/internal/openwrt"
@@ -18,6 +19,7 @@ type Api struct {
 }
 
 func NewApi(igs igs.Service) *Api {
+	github.Api().SetName("xxl6097", "openwrt-client-manager")
 	sseApi := sse.NewServer()
 	sseApi.Start()
 	a := &Api{
