@@ -19,4 +19,10 @@ func main() {
 	}
 	phyField := matches[1]         // 捕获组索引为1
 	fmt.Println("解析结果:", phyField) // 输出: phy1-ap0
+
+	a := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
+	a = append(a, 1, 2, 3)
+	size := len(a)
+	tempSize := size - 3
+	fmt.Println(a[tempSize:])
 }

@@ -160,10 +160,20 @@ func (this *openWRT) updateClientStatusList(macAddr string, timestamp string, st
 	}
 	if list == nil {
 		list = make([]*Status, 0)
+		statsList, e3 := getStatusFromSysLog()
+		if e3 == nil {
+			tempList := statsList[macAddr]
+			if tempList != nil && len(tempList) > 0 {
+				list = append(list, tempList...)
+			}
+
+		}
 	}
 	list = append(list, &s)
-	if len(list) > 1000 {
-		//list = list[:1000]
+	size := len(list)
+	if len(list) > MAX_SIZE {
+		tempSize := size - MAX_SIZE
+		list = list[tempSize:]
 	}
 	_ = setStatusByMac(macAddr, list)
 }

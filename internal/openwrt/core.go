@@ -26,6 +26,7 @@ var (
 	apStaDisConnectString = "AP-STA-DISCONNECTED"
 	apStaConnectString    = "AP-STA-CONNECTED"
 	statusDir             = "/usr/local/openwrt/status"
+	MAX_SIZE              = 1000 * 1000 * 4
 )
 
 type Status struct {
