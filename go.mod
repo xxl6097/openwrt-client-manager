@@ -3,7 +3,6 @@ module github.com/xxl6097/openwrt-client-manager
 go 1.23.2
 
 require (
-	e.coding.net/clife-devops/devp/go-http v0.0.21
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gorilla/mux v1.8.1
 	github.com/kardianos/service v1.2.2
