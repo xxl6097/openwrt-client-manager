@@ -497,4 +497,16 @@ html.dark .header-color {
   z-index: 9999;
   width: 100%;
 }
+
+@media screen and (max-width: 1180px) {
+  .main-width {
+    width: 30%;
+  }
+}
+
+@media screen and (max-width: 968px) {
+  .main-width {
+    width: 80%;
+  }
+}
 </style>

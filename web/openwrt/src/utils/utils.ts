@@ -152,6 +152,25 @@ export function syntaxHighlight(json: string): string {
   )
 }
 
+export function isMobile() {
+  if (isMobileWidth() || isMobilePhone()) {
+    return true
+  }
+  return false
+}
+
+export function isMobileWidth() {
+  if (window.innerWidth >= 992) {
+    return false
+  }
+  return true
+}
+
+export function isMobilePhone() {
+  const ua = navigator.userAgent.toLowerCase()
+  return !!ua.match(/iOS|iPhone|Android|windows Phone|BB\d+/i)
+}
+
 export function showLoading(title: string) {
   return ElLoading.service({
     lock: true,

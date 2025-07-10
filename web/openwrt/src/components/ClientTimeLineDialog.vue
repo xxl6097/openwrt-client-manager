@@ -3,7 +3,7 @@
     :modal="true"
     :close-on-click-modal="true"
     :close-on-press-escape="true"
-    width="20%"
+    :width="isMobile() ? '80%' : '30%'"
     v-model="showClientDialog"
     :title="title"
   >
@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import { ref, defineExpose } from 'vue'
 import { Client, Status } from '../utils/type.ts'
-import { showErrorTips, showTips } from '../utils/utils.ts'
+import { isMobile, showErrorTips, showTips } from '../utils/utils.ts'
 
 const showClientDialog = ref(false)
 const title = ref<string>()
@@ -100,5 +100,17 @@ defineExpose({
   min-width: 250px; /* 初始最小宽度 */
   max-width: 400px; /* 初始最小宽度 */
   margin-left: 10px;
+}
+
+@media screen and (max-width: 1180px) {
+  .main-width {
+    width: 30%;
+  }
+}
+
+@media screen and (max-width: 968px) {
+  .main-width {
+    width: 80%;
+  }
 }
 </style>
