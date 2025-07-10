@@ -5,7 +5,7 @@ options=("linux:amd64")
 #options=("linux:amd64" "windows:amd64")
 version=$(git tag -l "v[0-99]*.[0-99]*.[0-99]*" --sort=-creatordate | head -n 1)
 versionDir="$module/pkg"
-appname="uclient"
+appname="openwrt-client-manager"
 root=./cmd
 
 function writeVersionGoFile() {
