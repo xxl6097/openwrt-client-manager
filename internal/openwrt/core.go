@@ -4,10 +4,13 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/xxl6097/go-service/pkg/ukey"
+	"github.com/xxl6097/openwrt-client-manager/internal/u"
 	"log"
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -22,12 +25,13 @@ var (
 	brLanString           = "br-lan"
 	apStaDisConnectString = "AP-STA-DISCONNECTED"
 	apStaConnectString    = "AP-STA-CONNECTED"
+	statusDir             = "/usr/local/openwrt/status"
 )
 
 type Status struct {
 	Timestamp string `json:"timestamp"`
 	Connected bool   `json:"connected"`
-	MAC       string `json:"mac"`
+	//MAC       string `json:"mac"`
 }
 
 type DHCPLease struct {
@@ -130,7 +134,7 @@ func getStatusFromSysLog() (map[string][]*Status, error) {
 			value := make([]*Status, 0)
 			for _, entry := range v {
 				value = append(value, &Status{
-					MAC:       entry.MAC,
+					//MAC:       entry.MAC,
 					Timestamp: entry.StartTime,
 					Connected: entry.Online,
 				})
@@ -497,4 +501,47 @@ func command(fu func(string), name string, arg ...string) error {
 		return err
 	}
 	return cmd.Wait() // 等待命令退出
+}
+
+func getStatusByMac(mac string) []*Status {
+	if mac == "" {
+		return nil
+	}
+	_ = u.CheckDirector(statusDir)
+	tempFilePath := filepath.Join(statusDir, mac)
+	byteArray, err := os.ReadFile(tempFilePath)
+	if err != nil {
+		return nil
+	}
+	var cfg []*Status
+	err = ukey.GobToStruct(byteArray, &cfg)
+	if err != nil {
+		return nil
+	}
+	return cfg
+}
+
+func setStatusByMac(mac string, statusList []*Status) error {
+	if mac == "" {
+		return nil
+	}
+	if statusList == nil || len(statusList) == 0 {
+		return nil
+	}
+
+	content, err := ukey.StructToGob(statusList)
+	if err != nil {
+		return err
+	}
+
+	_ = u.CheckDirector(statusDir)
+	tempFilePath := filepath.Join(statusDir, mac)
+	file, err := os.Create(tempFilePath) // 文件不存在则创建，存在则截断
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	// 写入内容
+	_, err = file.Write(content)
+	return err
 }

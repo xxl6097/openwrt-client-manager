@@ -152,12 +152,28 @@ func (this *openWRT) initClients() {
 	this.clients = dataMap
 }
 
+func (this *openWRT) updateClientStatusList(macAddr string, timestamp string, status bool) {
+	list := getStatusByMac(macAddr)
+	s := Status{
+		Timestamp: timestamp,
+		Connected: status,
+	}
+	if list == nil {
+		list = make([]*Status, 0)
+	}
+	list = append(list, &s)
+	if len(list) > 1000 {
+		//list = list[:1000]
+	}
+	_ = setStatusByMac(macAddr, list)
+}
+
 func (this *openWRT) updateClientsBySysLog(timestamp string, macAddr string, phy string, status bool) {
 	if cls, ok := this.clients[macAddr]; ok {
 		cls.StatusList = append(cls.StatusList, &Status{
 			Timestamp: timestamp,
 			Connected: status,
-			MAC:       macAddr,
+			//MAC:       macAddr,
 		})
 		cls.Online = status
 		cls.Phy = phy
@@ -165,9 +181,11 @@ func (this *openWRT) updateClientsBySysLog(timestamp string, macAddr string, phy
 			this.fnWatcher()
 		}
 	}
+	this.updateClientStatusList(macAddr, timestamp, status)
 	//for _, nick := range this.nickMap {
 	//	glog.Printf("nick %+v\n", nick)
 	//}
+
 }
 
 func (p *openWRT) updateClientsByDHCP() {
@@ -267,6 +285,7 @@ func (this *openWRT) getClientsFromDHCPAndArpAndSysLogAndNick() (map[string]*DHC
 			}
 			if e3 == nil {
 				item.StatusList = status[mac]
+				_ = setStatusByMac(mac, item.StatusList)
 			}
 			if e4 == nil {
 				if nick, ok := nicks[mac]; ok {
@@ -308,4 +327,8 @@ func (this *openWRT) Nick(obj *DHCPLease) error {
 		this.fnWatcher()
 	}
 	return setNickData(this.nickMap)
+}
+
+func (this *openWRT) GetDeviceStatusList(mac string) []*Status {
+	return getStatusByMac(mac)
 }

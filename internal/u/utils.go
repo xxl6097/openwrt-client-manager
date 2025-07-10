@@ -133,3 +133,11 @@ func GetVersion() map[string]interface{} {
 		"arch":        pkg.Arch,
 	}
 }
+
+func CheckDirector(path string) error {
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		// 存在，删除
+		return nil
+	}
+	return os.MkdirAll(path, 0755)
+}

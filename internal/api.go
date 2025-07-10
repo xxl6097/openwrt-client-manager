@@ -59,16 +59,14 @@ func (this *Api) GetClients(w http.ResponseWriter, r *http.Request) {
 }
 
 func (this *Api) GetStatus(w http.ResponseWriter, r *http.Request) {
-	//req := utils.GetReqMapData(w, r)
-	//glog.Warn(req)
-	glog.Warn("GetStatus---->", r)
-	//status, err := getStatusFromSysLog()
-	//if err != nil {
-	//	glog.Error("getClients err:", err)
-	//	u.Respond(w, u.Error(-1, err.Error()))
-	//} else {
-	//	u.Respond(w, u.SucessWithObject(status))
-	//}
+	res, f := Response(r)
+	defer f(w)
+	mac := r.URL.Query().Get("mac")
+	if mac == "" {
+		res.Error("mac地址空～")
+		return
+	}
+	res.Sucess("获取成功", openwrt.GetInstance().GetDeviceStatusList(mac))
 }
 
 func (this *Api) Clear(w http.ResponseWriter, r *http.Request) {

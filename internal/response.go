@@ -33,6 +33,7 @@ func (g *GeneralResponse) Err(err error) *GeneralResponse {
 	return g.Response(-1, err.Error())
 }
 func (g *GeneralResponse) Error(msg string) *GeneralResponse {
+	glog.Error(msg)
 	return g.Response(-1, msg)
 }
 func (g *GeneralResponse) Any(data any) *GeneralResponse {
