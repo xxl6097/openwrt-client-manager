@@ -335,17 +335,6 @@ function githubActions() {
   mv -fv ./release/${appname}* ./release/packages
 }
 
-function bootstrap() {
-  #printf "\033[1;31m%-10s\033[0m\n" "Error"  # 红色加粗文本
-  if [ $# -ge 2 ] && [ -n "$2" ]; then
-    version=$2
-  fi
-  writeVersionGoFile
-  case $1 in
-  github) (githubActions) ;;
-    *) (buildInstaller)  ;;
-  esac
-}
 
 function showMenu() {
     echo "1. 编译程序"
@@ -373,5 +362,18 @@ function buildInstaller() {
   buildMenu $builddir $appname "$version" $appdir $disname $describe
 #  buildAll $builddir $appname "$version" $appdir $disname $describe
   install
+}
+
+
+function bootstrap() {
+  #printf "\033[1;31m%-10s\033[0m\n" "Error"  # 红色加粗文本
+  if [ $# -ge 2 ] && [ -n "$2" ]; then
+    version=$2
+  fi
+  writeVersionGoFile
+  case $1 in
+  github) (githubActions) ;;
+    *) (buildInstaller)  ;;
+  esac
 }
 bootstrap $1 $2
