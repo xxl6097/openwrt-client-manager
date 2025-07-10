@@ -44,6 +44,10 @@ func (this *ApiRoute) Setup(router *mux.Router) {
 		NoAuth: false,
 	})
 
+	router.HandleFunc("/api/checkversion", this.restApi.ApiCheckVersion).Methods("GET")
+	router.HandleFunc("/api/upgrade", this.restApi.ApiUpdate).Methods("POST")
+	router.HandleFunc("/api/upgrade", this.restApi.ApiUpdate).Methods("PUT")
+
 	router.Handle("/api/client/sse", this.restApi.GetSSE())
 	//subRouter.Handle("/api/client/sse", this.sseApi)
 	//httpserver.RouterUtil.AddHandleFunc(router, ihttpserver.ApiModel{

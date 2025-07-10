@@ -11,7 +11,8 @@ func main() {
 	fmt.Println("Hello World")
 	httpserver.New().
 		CORSMethodMiddleware().
-		AddRoute(internal.NewRoute(internal.NewApi())).
+		BasicAuth("admin", "admin").
+		AddRoute(internal.NewRoute(internal.NewApi(nil))).
 		AddRoute(assets.NewRoute()).
 		Done(8080)
 }

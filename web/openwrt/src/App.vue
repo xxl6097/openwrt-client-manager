@@ -1,4 +1,12 @@
 <template>
+  <el-progress
+    v-if="globalProgress > 0 && globalProgress < 100"
+    :percentage="globalProgress"
+    :stroke-width="2"
+    :show-text="false"
+    :color="customColors"
+    class="global-progress-bar"
+  />
   <div id="app">
     <header class="grid-content header-color">
       <div class="header-content">
@@ -7,6 +15,12 @@
             <a href="#">客户端列表</a>
             <template #dropdown>
               <el-dropdown-menu>
+                <el-dropdown-item @click="handleShowCheckVersionDialog"
+                  >版本检测
+                </el-dropdown-item>
+                <el-dropdown-item @click="manusForm.show = true"
+                  >手动升级
+                </el-dropdown-item>
                 <el-dropdown-item @click="handleClearData"
                   >清空数据
                 </el-dropdown-item>
@@ -45,21 +59,21 @@
             <!--            <template #default="props">-->
             <!--              <div m="4">-->
             <!--                <p m="t-0 b-2">接口: {{ props.row.phy }}</p>-->
-<!--                            <el-timeline style="max-width: 200px">-->
-<!--                              <el-timeline-item-->
-<!--                                v-for="(activity, index) in props.row.statusList"-->
-<!--                                :key="index"-->
-<!--                                :color="activity.connected ? '#55f604' : 'red'"-->
-<!--                                :hollow="false"-->
-<!--                                :timestamp="activity.timestamp"-->
-<!--                              >-->
-<!--                                <span-->
-<!--                                  :style="{ color: activity.connected ? '#55f604' : 'red' }"-->
-<!--                                >-->
-<!--                                  {{ activity.connected ? '在线' : '离线' }}-->
-<!--                                </span>-->
-<!--                              </el-timeline-item>-->
-<!--                            </el-timeline>-->
+            <!--                            <el-timeline style="max-width: 200px">-->
+            <!--                              <el-timeline-item-->
+            <!--                                v-for="(activity, index) in props.row.statusList"-->
+            <!--                                :key="index"-->
+            <!--                                :color="activity.connected ? '#55f604' : 'red'"-->
+            <!--                                :hollow="false"-->
+            <!--                                :timestamp="activity.timestamp"-->
+            <!--                              >-->
+            <!--                                <span-->
+            <!--                                  :style="{ color: activity.connected ? '#55f604' : 'red' }"-->
+            <!--                                >-->
+            <!--                                  {{ activity.connected ? '在线' : '离线' }}-->
+            <!--                                </span>-->
+            <!--                              </el-timeline-item>-->
+            <!--                            </el-timeline>-->
             <!--              </div>-->
             <!--            </template>-->
           </el-table-column>
@@ -118,6 +132,41 @@
     <footer></footer>
   </div>
 
+  <!--  客户端程序升级-->
+  <el-dialog v-model="manusForm.show" align-center width="500">
+    <template #header><span>程序升级</span></template>
+    <el-input
+      v-model="manusForm.binUrl"
+      autocomplete="off"
+      placeholder="请输入程序Url地址～"
+    />
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-upload
+          class="upload-demo"
+          :http-request="handleUploadUpgradeBin"
+          :limit="1"
+        >
+          <template #trigger>
+            <el-button type="primary" :disabled="manusForm.binUrl.length > 0"
+              >上传文件升级
+            </el-button>
+          </template>
+          <!-- 添加额外按钮 -->
+          <el-button
+            style="margin-left: 10px"
+            type="danger"
+            @click="handleUpdate"
+          >
+            文件url升级
+          </el-button>
+        </el-upload>
+      </div>
+    </template>
+  </el-dialog>
+
+  <UpgradeDialog ref="upgradeRef" />
   <ClientTimeLineDialog ref="clientTimeLineDialogRef" />
 </template>
 
@@ -126,15 +175,36 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useDark, useToggle } from '@vueuse/core'
 import { Client } from './utils/type.ts'
 import ClientTimeLineDialog from './components/ClientTimeLineDialog.vue'
-import { showErrorTips, showTips, showWarmDialog } from './utils/utils.ts'
+import {
+  showErrorTips,
+  showLoading,
+  showSucessTips,
+  showTips,
+  showWarmDialog,
+  showWarmTips,
+  xhrPromise,
+} from './utils/utils.ts'
 import { EventAwareSSEClient } from './utils/sseclient.ts'
 import { ElMessageBox } from 'element-plus'
 import ViewExpand from './components/expand/ViewExpand.vue'
+import UpgradeDialog from './components/expand/UpgradeDialog.vue'
 
 const clientTimeLineDialogRef = ref<InstanceType<
   typeof ClientTimeLineDialog
 > | null>(null)
 
+const manusForm = ref({
+  show: false,
+  binUrl: '',
+})
+const customColors = [
+  { color: '#f56c6c', percentage: 20 },
+  { color: '#e6a23c', percentage: 40 },
+  { color: '#5cb87a', percentage: 60 },
+  { color: '#1989fa', percentage: 80 },
+  { color: '#6f7ad3', percentage: 100 },
+]
+const globalProgress = ref(0)
 const isDark = useDark()
 const darkmodeSwitch = ref(isDark)
 const toggleDark = useToggle(isDark)
@@ -157,6 +227,91 @@ const filteredTableData = computed<Client[]>(() => {
 
 function renderTable(data: any) {
   tableData.value = data as Client[]
+}
+
+const upgradeRef = ref<InstanceType<typeof UpgradeDialog> | null>(null)
+
+const handleShowCheckVersionDialog = () => {
+  if (upgradeRef.value) {
+    upgradeRef.value.openUpgradeDialog()
+  }
+}
+// 自定义上传函数
+const handleUploadUpgradeBin = (options: any) => {
+  const { file } = options
+  const formData = new FormData()
+  formData.append('file', file)
+  const loading = showLoading('程序更新中...')
+  globalProgress.value = 0
+  manusForm.value.show = false
+  xhrPromise({
+    url: '../api/upgrade',
+    method: 'POST',
+    data: formData,
+    onUploadProgress: (progress: string) => {
+      console.log(`上传进度：${progress}`)
+      loading.setText(`程序更新中...${progress}%`)
+      globalProgress.value = parseInt(progress)
+    },
+  })
+    .then((data: any) => {
+      console.log('请求成功', data)
+      // 上传成功的回调
+      const json = JSON.parse(data.data)
+      if (json.code !== 0) {
+        if (json.msg !== '') {
+          showErrorTips(json.msg)
+        }
+      } else {
+        if (json.msg !== '') {
+          showSucessTips(json.msg)
+        }
+      }
+    })
+    .catch((error) => {
+      console.error('请求失败', error)
+      // 上传失败的回调
+      //showErrorTips('上传失败的回调')
+    })
+    .finally(() => {
+      setTimeout(function () {
+        loading.close()
+        globalProgress.value = 0
+        manusForm.value.show = false
+        window.location.reload()
+      }, 4000)
+    })
+}
+
+const handleUpdate = () => {
+  if (manusForm.value.binUrl.length > 0) {
+    const binUrl = manusForm.value.binUrl
+    console.log('upgradeByUrl', binUrl)
+    const loading = showLoading('程序升级中...')
+    manusForm.value.show = false
+    fetch('../api/upgrade', {
+      credentials: 'include',
+      method: 'PUT',
+      body: binUrl,
+    })
+      .then((res) => {
+        return res.json()
+      })
+      .then((json) => {
+        showTips(json.code, json.msg)
+      })
+      .catch(() => {
+        showWarmTips('更新失败')
+      })
+      .finally(() => {
+        setTimeout(function () {
+          loading.close()
+          window.location.reload()
+        }, 4000)
+      })
+  } else {
+    showWarmTips('请正确输入url地址')
+  }
 }
 
 const fetchData = () => {
@@ -331,5 +486,13 @@ html.dark .header-color {
   justify-content: flex-end;
   flex-grow: 1;
   padding-right: 40px;
+}
+
+.global-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 100%;
 }
 </style>

@@ -2,22 +2,30 @@ package internal
 
 import (
 	"github.com/xxl6097/glog/glog"
+	"github.com/xxl6097/go-service/pkg/gs/igs"
 	"github.com/xxl6097/openwrt-client-manager/internal/iface"
 	"github.com/xxl6097/openwrt-client-manager/internal/openwrt"
 	"github.com/xxl6097/openwrt-client-manager/internal/sse"
 	"github.com/xxl6097/openwrt-client-manager/internal/u"
 	"net/http"
+	"sync"
 )
 
 type Api struct {
+	igs    igs.Service
 	sseApi iface.ISSE
+	pool   *sync.Pool // use sync.Pool caching buf to reduce gc ratio
 }
 
-func NewApi() *Api {
+func NewApi(igs igs.Service) *Api {
 	sseApi := sse.NewServer()
 	sseApi.Start()
 	a := &Api{
+		igs:    igs,
 		sseApi: sseApi,
+		pool: &sync.Pool{
+			New: func() interface{} { return make([]byte, 32*1024) },
+		},
 	}
 	openwrt.GetInstance().Listen(a.listen)
 	return a
