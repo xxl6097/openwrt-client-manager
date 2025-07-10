@@ -1,9 +1,9 @@
 package internal
 
 import (
-	"e.coding.net/clife-devops/devp/go-http/pkg/httpserver"
-	"e.coding.net/clife-devops/devp/go-http/pkg/ihttpserver"
 	"github.com/gorilla/mux"
+	"github.com/xxl6097/go-http/pkg/httpserver"
+	"github.com/xxl6097/go-http/pkg/ihttpserver"
 	"net/http"
 )
 

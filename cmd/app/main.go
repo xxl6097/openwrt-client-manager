@@ -1,8 +1,8 @@
 package main
 
 import (
-	"e.coding.net/clife-devops/devp/go-http/pkg/httpserver"
 	"fmt"
+	"github.com/xxl6097/go-http/pkg/httpserver"
 	assets "github.com/xxl6097/openwrt-client-manager/assets/openwrt"
 	"github.com/xxl6097/openwrt-client-manager/internal"
 )

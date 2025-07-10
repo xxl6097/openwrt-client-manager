@@ -1,10 +1,10 @@
 package service
 
 import (
-	"e.coding.net/clife-devops/devp/go-http/pkg/httpserver"
 	"fmt"
 	"github.com/kardianos/service"
 	"github.com/xxl6097/glog/glog"
+	"github.com/xxl6097/go-http/pkg/httpserver"
 	_ "github.com/xxl6097/go-service/assets/buffer"
 	"github.com/xxl6097/go-service/pkg/gs/igs"
 	"github.com/xxl6097/go-service/pkg/ukey"
