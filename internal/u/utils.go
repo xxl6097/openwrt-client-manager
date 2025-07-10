@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/xxl6097/glog/glog"
+	"github.com/xxl6097/openwrt-client-manager/pkg"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -114,4 +115,21 @@ func ByteCountIEC(b uint64) string {
 		exp++
 	}
 	return fmt.Sprintf("%.1f %ciB", float64(b)/float64(div), "KMGTPE"[exp])
+}
+
+func GetVersion() map[string]interface{} {
+	hostName, _ := os.Hostname()
+	return map[string]interface{}{
+		"hostName":    hostName,
+		"appName":     pkg.AppName,
+		"appVersion":  pkg.AppVersion,
+		"buildTime":   pkg.BuildTime,
+		"gitRevision": pkg.GitRevision,
+		"gitBranch":   pkg.GitBranch,
+		"goVersion":   pkg.GoVersion,
+		"displayName": pkg.DisplayName,
+		"description": pkg.Description,
+		"osType":      pkg.OsType,
+		"arch":        pkg.Arch,
+	}
 }

@@ -14,6 +14,15 @@ import (
 	"path/filepath"
 )
 
+func (this *Api) ApiVersion(w http.ResponseWriter, r *http.Request) {
+	res, f := Response(r)
+	defer f(w)
+	res.Sucess("获取成功", u.GetVersion())
+	//glog.Println("操作系统:", runtime.GOOS)     // 如 "linux", "windows"
+	//glog.Println("CPU 架构:", runtime.GOARCH) // 如 "amd64", "arm64"
+	//glog.Println("CPU 核心数:", runtime.NumCPU())
+}
+
 func (this *Api) ApiCheckVersion(w http.ResponseWriter, r *http.Request) {
 	res, f := Response(r)
 	defer f(w)

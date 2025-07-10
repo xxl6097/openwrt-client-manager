@@ -12,7 +12,7 @@
       <div class="header-content">
         <div class="brand">
           <el-dropdown trigger="click">
-            <a href="#">客户端列表</a>
+            <a href="#">{{ title }}</a>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item @click="handleShowCheckVersionDialog"
@@ -189,6 +189,7 @@ import { ElMessageBox } from 'element-plus'
 import ViewExpand from './components/expand/ViewExpand.vue'
 import UpgradeDialog from './components/expand/UpgradeDialog.vue'
 
+const title = ref<string>('客户端列表')
 const clientTimeLineDialogRef = ref<InstanceType<
   typeof ClientTimeLineDialog
 > | null>(null)
@@ -204,6 +205,7 @@ const customColors = [
   { color: '#1989fa', percentage: 80 },
   { color: '#6f7ad3', percentage: 100 },
 ]
+const appinfo = ref<any>()
 const globalProgress = ref(0)
 const isDark = useDark()
 const darkmodeSwitch = ref(isDark)
@@ -227,6 +229,25 @@ const filteredTableData = computed<Client[]>(() => {
 
 function renderTable(data: any) {
   tableData.value = data as Client[]
+}
+
+const getVersion = () => {
+  // versionDialogVisible.value = true
+  fetch('../api/version', { credentials: 'include', method: 'GET' })
+    .then((res) => {
+      return res.json()
+    })
+    .then((json) => {
+      if (json && json.code === 0 && json.data) {
+        appinfo.value = json.data
+        if (json.data && json.data.appVersion) {
+          title.value = `客户端列表 ${json.data.appVersion}`
+        }
+      }
+    })
+    .catch(() => {
+      showErrorTips('失败')
+    })
 }
 
 const upgradeRef = ref<InstanceType<typeof UpgradeDialog> | null>(null)
@@ -428,6 +449,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', updateDialogWidth)
 })
+getVersion()
 connectSSE()
 fetchData()
 </script>

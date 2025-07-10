@@ -11,6 +11,7 @@ import (
 
 func init() {
 	if u.IsMacOs() {
+		pkg.AppVersion = "v0.0.3"
 		pkg.BinName = "openwrt-client-manager_v0.0.20_darwin_arm64"
 	}
 }

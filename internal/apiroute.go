@@ -47,6 +47,7 @@ func (this *ApiRoute) Setup(router *mux.Router) {
 	router.HandleFunc("/api/checkversion", this.restApi.ApiCheckVersion).Methods("GET")
 	router.HandleFunc("/api/upgrade", this.restApi.ApiUpdate).Methods("POST")
 	router.HandleFunc("/api/upgrade", this.restApi.ApiUpdate).Methods("PUT")
+	router.HandleFunc("/api/version", this.restApi.ApiVersion).Methods("GET")
 
 	router.Handle("/api/client/sse", this.restApi.GetSSE())
 	//subRouter.Handle("/api/client/sse", this.sseApi)
