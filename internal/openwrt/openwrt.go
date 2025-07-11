@@ -140,6 +140,13 @@ func (this *openWRT) GetClients() []*DHCPLease {
 	})
 	return data
 }
+func (this *openWRT) ResetClients() {
+	this.initClients()
+
+	if this.fnWatcher != nil {
+		this.fnWatcher()
+	}
+}
 
 func (this *openWRT) initClients() {
 	dataMap, err := this.getClientsFromDHCPAndArpAndSysLogAndNick()
@@ -346,7 +353,7 @@ func (this *openWRT) DeleteStaticIp(mac string) error {
 	return deleteStaticIpAddress(mac)
 }
 
-func (this *openWRT) GetStaticIps() ([]*DHCPHost, error) {
+func (this *openWRT) GetStaticIps() ([]DHCPHost, error) {
 	return GetUCIOutput()
 }
 

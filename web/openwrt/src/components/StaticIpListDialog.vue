@@ -28,7 +28,7 @@
             <el-table-column label="操作">
               <template #default="{ row }">
                 <el-button size="small" type="text" @click="handleDelete(row)"
-                  >操作
+                  >删除
                 </el-button>
               </template>
             </el-table-column>
@@ -96,10 +96,36 @@ const formData = ref({
   } as Client,
 })
 
+function refreshList() {
+  const loadings = showLoading('静态IP列表请求中...')
+  fetch(`../api/staticip/list`, {
+    credentials: 'include',
+    method: 'GET',
+  })
+    .then((res) => res.json())
+    .then((json) => {
+      console.log('静态IP列表', json)
+      if (json && json.code === 0) {
+        console.log(json)
+        if (json.data) {
+          renderTable(json.data)
+        }
+      }
+      showTips(json.code, json.msg)
+    })
+    .catch((error) => {
+      console.log('error', error)
+      showErrorTips(`获取失败${JSON.stringify(error)}`)
+    })
+    .finally(() => {
+      loadings.close()
+    })
+}
+
 function handleDelete(row: any) {
   console.log(row)
   const loader = showLoading('删除中...')
-  fetch(`../api/delete/staticip?mac=${row.mac}`, {
+  fetch(`../api/staticip/delete?mac=${row.mac}`, {
     credentials: 'include',
     method: 'DELETE',
   })
@@ -116,38 +142,15 @@ function handleDelete(row: any) {
     })
     .finally(() => {
       loader.close()
+      refreshList()
     })
 }
 
-function fetchData() {
-  formData.value.loading = true
-  const load = showLoading('静态IP列表请求中...')
-  fetch(`../api/get/staticips`, {
-    credentials: 'include',
-    method: 'GET',
-  })
-    .then((res) => res.json())
-    .then((json) => {
-      console.log('fetchData', json)
-      if (json && json.code === 0 && json.data) {
-        console.log(json)
-        formData.value.show = true
-        renderTable(json.data)
-      }
-    })
-    .catch((error) => {
-      console.log('error', error)
-      showErrorTips(`获取失败${JSON.stringify(error)}`)
-    })
-    .finally(() => {
-      load.close
-    })
-}
-
-const showDialogForm = () => {
+const showDialogForm = (list: DHCPHost[]) => {
   console.log('打开对话框，row:')
   formData.value.title = `静态IP列表`
-  fetchData()
+  formData.value.show = true
+  renderTable(list)
 }
 
 // 暴露方法供父组件调用

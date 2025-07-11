@@ -26,9 +26,9 @@ func setStaticLease(mac, ip, name string) error {
 	}
 
 	// 设置参数
+	exec.Command("uci", "set", "dhcp.@host[-1].name="+name).Run()
 	exec.Command("uci", "set", "dhcp.@host[-1].mac="+mac).Run()
 	exec.Command("uci", "set", "dhcp.@host[-1].ip="+ip).Run()
-	exec.Command("uci", "set", "dhcp.@host[-1].name="+name).Run()
 
 	// 提交配置变更
 	if err := exec.Command("uci", "commit", "dhcp").Run(); err != nil {
@@ -54,6 +54,10 @@ func deleteStaticLease(index string) error {
 
 func restartDNSMasq() error {
 	cmd := exec.Command("/etc/init.d/dnsmasq", "restart")
+	return cmd.Run()
+}
+func RestartNetwork() error {
+	cmd := exec.Command("/etc/init.d/network", "restart")
 	return cmd.Run()
 }
 
@@ -123,8 +127,8 @@ func TestStaticLease() {
 	log.Println("静态IP设置成功！")
 }
 
-func parseUciShowDHCP(output string) []*DHCPHost {
-	var leases []*DHCPHost
+func parseUciShowDHCP(output string) []DHCPHost {
+	var leases []DHCPHost
 	lines := strings.Split(output, "\n")
 	var currentIndex string
 	var currentLease DHCPHost
@@ -142,7 +146,7 @@ func parseUciShowDHCP(output string) []*DHCPHost {
 
 		if match := reConfig.FindStringSubmatch(line); match != nil {
 			if currentIndex != "" {
-				leases = append(leases, &currentLease)
+				leases = append(leases, currentLease)
 			}
 			currentIndex = match[1]
 			currentLease = DHCPHost{Index: currentIndex}
@@ -158,13 +162,13 @@ func parseUciShowDHCP(output string) []*DHCPHost {
 	}
 
 	if currentIndex != "" {
-		leases = append(leases, &currentLease)
+		leases = append(leases, currentLease)
 	}
 
 	return leases
 }
 
-func GetUCIOutput() ([]*DHCPHost, error) {
+func GetUCIOutput() ([]DHCPHost, error) {
 	cmd := exec.Command("uci", "show", "dhcp")
 	output, err := cmd.Output()
 	if err != nil {

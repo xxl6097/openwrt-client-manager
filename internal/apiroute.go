@@ -2,7 +2,6 @@ package internal
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/xxl6097/go-http/pkg/httpserver"
 	"github.com/xxl6097/go-http/pkg/ihttpserver"
 	"net/http"
 )
@@ -19,34 +18,19 @@ func NewRoute(ctl *Api) ihttpserver.IRoute {
 }
 
 func (this *ApiRoute) Setup(router *mux.Router) {
-	httpserver.RouterUtil.AddHandleFunc(router, ihttpserver.ApiModel{
-		Method: http.MethodGet,
-		Path:   "/api/get/clients",
-		Fun:    this.restApi.GetClients,
-		NoAuth: false,
-	})
-	httpserver.RouterUtil.AddHandleFunc(router, ihttpserver.ApiModel{
-		Method: http.MethodGet,
-		Path:   "/api/get/status",
-		Fun:    this.restApi.GetStatus,
-		NoAuth: false,
-	})
-	httpserver.RouterUtil.AddHandleFunc(router, ihttpserver.ApiModel{
-		Method: http.MethodDelete,
-		Path:   "/api/clear",
-		Fun:    this.restApi.Clear,
-		NoAuth: false,
-	})
-	httpserver.RouterUtil.AddHandleFunc(router, ihttpserver.ApiModel{
-		Method: http.MethodPost,
-		Path:   "/api/nick/set",
-		Fun:    this.restApi.SetNick,
-		NoAuth: false,
-	})
 
-	router.HandleFunc("/api/set/staticip", this.restApi.SetStaticIp).Methods(http.MethodPost)
-	router.HandleFunc("/api/delete/staticip", this.restApi.DeleteStaticIp).Methods(http.MethodDelete)
-	router.HandleFunc("/api/get/staticips", this.restApi.GetStaticIps).Methods(http.MethodGet)
+	router.HandleFunc("/api/get/status", this.restApi.GetStatus).Methods(http.MethodGet)
+	router.HandleFunc("/api/clear", this.restApi.Clear).Methods(http.MethodDelete)
+	router.HandleFunc("/api/nick/set", this.restApi.SetNick).Methods(http.MethodPost)
+
+	router.HandleFunc("/api/network/reset", this.restApi.ResetNetwork).Methods(http.MethodPost)
+
+	router.HandleFunc("/api/clients/get", this.restApi.GetClients).Methods(http.MethodGet)
+	router.HandleFunc("/api/clients/reset", this.restApi.ResetClients).Methods(http.MethodPost)
+
+	router.HandleFunc("/api/staticip/set", this.restApi.SetStaticIp).Methods(http.MethodPost)
+	router.HandleFunc("/api/staticip/delete", this.restApi.DeleteStaticIp).Methods(http.MethodDelete)
+	router.HandleFunc("/api/staticip/list", this.restApi.GetStaticIps).Methods(http.MethodGet)
 
 	router.HandleFunc("/api/checkversion", this.restApi.ApiCheckVersion).Methods("GET")
 	router.HandleFunc("/api/upgrade", this.restApi.ApiUpdate).Methods("POST")

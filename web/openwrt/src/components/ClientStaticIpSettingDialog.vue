@@ -62,9 +62,9 @@ const formData = ref({
 
 function handleConfirm() {
   formData.value.loading = true
-  fetch(`../api/set/staticip`, {
+  fetch(`../api/staticip/set`, {
     credentials: 'include',
-    method: 'PUT',
+    method: 'POST',
     body: JSON.stringify(formData.value.client),
   })
     .then((res) => res.json())
@@ -76,8 +76,9 @@ function handleConfirm() {
         showTips(json.code, json.msg)
       }
     })
-    .catch(() => {
-      showErrorTips('获取失败')
+    .catch((error) => {
+      console.log(error)
+      showErrorTips(`获取失败${JSON.stringify(error)}`)
     })
     .finally(() => {
       formData.value.loading = false

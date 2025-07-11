@@ -361,7 +361,7 @@ function buildInstaller() {
   rm -rf ${builddir}
   buildMenu $builddir $appname "$version" $appdir $disname $describe
 #  buildAll $builddir $appname "$version" $appdir $disname $describe
-  install
+#  install
 }
 
 

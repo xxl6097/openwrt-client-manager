@@ -24,6 +24,12 @@
                 <el-dropdown-item @click="handleClearData"
                   >清空数据
                 </el-dropdown-item>
+                <el-dropdown-item @click="handleResetClients"
+                  >重置列表
+                </el-dropdown-item>
+                <el-dropdown-item @click="handleAResetNetwork"
+                  >重置网络
+                </el-dropdown-item>
                 <el-dropdown-item @click="handleShowStaticIpListDialog"
                   >查看静态IP列表
                 </el-dropdown-item>
@@ -204,9 +210,9 @@ const clientTimeLineDialogRef = ref<InstanceType<
 const clientStaticIpDialogRef = ref<InstanceType<
   typeof ClientStaticIpSettingDialog
 > | null>(null)
-const staticIpListDialogRef = ref<InstanceType<typeof StaticIpListDialog> | null>(
-  null,
-)
+const staticIpListDialogRef = ref<InstanceType<
+  typeof StaticIpListDialog
+> | null>(null)
 
 const manusForm = ref({
   show: false,
@@ -390,7 +396,7 @@ const testData = [
 
 const fetchData = () => {
   console.log('fetchData')
-  fetch(`../api/get/clients`, {
+  fetch(`../api/clients/get`, {
     credentials: 'include',
     method: 'GET',
   })
@@ -437,7 +443,7 @@ const handleDeleteStaticIp = (row: Client) => {
   })
     .then(() => {
       const loader = showLoading('删除中...')
-      fetch(`../api/delete/staticip?mac=${row.mac}`, {
+      fetch(`../api/staticip/delete?mac=${row.mac}`, {
         credentials: 'include',
         method: 'DELETE',
       })
@@ -486,11 +492,68 @@ const handleChangeNickName = (row: Client) => {
   })
 }
 
+function handleResetClients() {
+  console.log('handleResetClients')
+  fetch(`../api/clients/reset`, {
+    credentials: 'include',
+    method: 'POST',
+  })
+    .then((res) => res.json())
+    .then((json) => {
+      console.log('重置列表', json)
+      showTips(json.code, json.msg)
+    })
+    .catch((error) => {
+      console.log('error', error)
+      showErrorTips(`重置失败${JSON.stringify(error)}`)
+    })
+}
+
+function handleAResetNetwork() {
+  showWarmDialog(
+    `确定重置网络吗？`,
+    () => {
+      fetch('../api/network/reset', { credentials: 'include', method: 'POST' })
+        .then((res) => {
+          return res.json()
+        })
+        .then((json) => {
+          showTips(json.code, json.msg)
+        })
+        .catch((error) => {
+          console.log('error', error)
+          showErrorTips(`重置网络失败${JSON.stringify(error)}`)
+        })
+    },
+    () => {},
+  )
+}
+
 function handleShowStaticIpListDialog() {
-  console.log('handleShowStaticIpListDialog')
-  if (staticIpListDialogRef.value) {
-    staticIpListDialogRef.value.showDialogForm()
-  }
+  console.log('查看静态IP列表')
+  const loadings = showLoading('静态IP列表请求中...')
+  fetch(`../api/staticip/list`, {
+    credentials: 'include',
+    method: 'GET',
+  })
+    .then((res) => res.json())
+    .then((json) => {
+      console.log('静态IP列表', json)
+      if (json && json.code === 0) {
+        console.log(json)
+        if (staticIpListDialogRef.value && json.data) {
+          staticIpListDialogRef.value.showDialogForm(json.data)
+        }
+      }
+      showTips(json.code, json.msg)
+    })
+    .catch((error) => {
+      console.log('error', error)
+      showErrorTips(`获取失败${JSON.stringify(error)}`)
+    })
+    .finally(() => {
+      loadings.close()
+    })
 }
 
 const handleShowStaitcIpDialog = (row: Client) => {

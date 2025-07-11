@@ -59,6 +59,13 @@ func (this *Api) GetClients(w http.ResponseWriter, r *http.Request) {
 	u.Respond(w, u.SucessWithObject(openwrt.GetInstance().GetClients()))
 }
 
+func (this *Api) ResetClients(w http.ResponseWriter, r *http.Request) {
+	res, f := Response(r)
+	defer f(w)
+	openwrt.GetInstance().ResetClients()
+	res.Ok("重置成功~")
+}
+
 func (this *Api) GetStatus(w http.ResponseWriter, r *http.Request) {
 	res, f := Response(r)
 	defer f(w)
@@ -133,7 +140,19 @@ func (this *Api) GetStaticIps(w http.ResponseWriter, r *http.Request) {
 		res.Err(fmt.Errorf("列表空"))
 		return
 	}
-	res.Any(ips)
+	res.Object("请求列表成功", ips)
+}
+
+func (this *Api) ResetNetwork(w http.ResponseWriter, r *http.Request) {
+	res, f := Response(r)
+	defer f(w)
+	err := openwrt.RestartNetwork()
+	if err != nil {
+		glog.Error(err)
+		res.Err(err)
+		return
+	}
+	res.Ok("重置成功")
 }
 
 func (this *Api) SetNick(w http.ResponseWriter, r *http.Request) {
