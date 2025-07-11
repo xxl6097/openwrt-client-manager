@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/xxl6097/glog/glog"
 	"github.com/xxl6097/go-service/pkg/ukey"
 	"github.com/xxl6097/openwrt-client-manager/internal/u"
 	"log"
@@ -26,12 +27,12 @@ var (
 	apStaDisConnectString = "AP-STA-DISCONNECTED"
 	apStaConnectString    = "AP-STA-CONNECTED"
 	statusDir             = "/usr/local/openwrt/status"
-	MAX_SIZE              = 1000 * 1000 * 4
+	MAX_SIZE              = 1000
 )
 
 type Status struct {
-	Timestamp string `json:"timestamp"`
-	Connected bool   `json:"connected"`
+	Timestamp int64 `json:"timestamp"`
+	Connected bool  `json:"connected"`
 	//MAC       string `json:"mac"`
 }
 
@@ -41,7 +42,7 @@ type DHCPLease struct {
 	Phy       string `json:"phy"`
 	Hostname  string `json:"hostname"` //客户端上报的主机名（可能为空或 *）
 	NickName  string `json:"nickName"` //
-	StartTime string `json:"starTime"` //租约失效的精确时间（秒级精度）
+	StartTime int64  `json:"starTime"` //租约失效的精确时间（秒级精度）
 	Online    bool   `json:"online"`
 	//StatusList []*Status `json:"statusList"`
 }
@@ -55,7 +56,7 @@ type ARPEntry struct {
 }
 type NickEntry struct {
 	Name      string `json:"name"`
-	StartTime string `json:"starTime"`
+	StartTime int64  `json:"starTime"`
 	MAC       string `json:"mac"`
 	IP        string `json:"ip"`
 	Hostname  string `json:"hostname"`
@@ -82,7 +83,7 @@ func getDataFromSysLog(pattern string, args ...string) (map[string][]DHCPLease, 
 					}
 					element := DHCPLease{
 						MAC:       mac.String(),
-						StartTime: t.Format(time.DateTime),
+						StartTime: t.Unix(),
 						Online:    status,
 					}
 					v, ok := dataMap[element.MAC]
@@ -99,7 +100,7 @@ func getDataFromSysLog(pattern string, args ...string) (map[string][]DHCPLease, 
 	}, "logread", args...)
 }
 
-func listenSysLog(fn func(string, string, string, bool)) error {
+func listenSysLog(fn func(int64, string, string, bool)) error {
 	//args := []string{"-f", "|", "grep", "hostapd.*"}
 	pattern := `hostapd.*`
 	re := regexp.MustCompile(pattern)
@@ -208,7 +209,7 @@ func getLeaseTime() time.Duration {
 	return leaseDuration
 }
 
-func parseTime(logLine string) string {
+func parseTime(logLine string) int64 {
 	//re := regexp.MustCompile(`^(\w+\s+\w+\s+\d+\s+\d+:\d+:\d+\s+\d+)`)
 	//matches := re.FindStringSubmatch(logLine)
 	//if len(matches) > 1 {
@@ -219,6 +220,14 @@ func parseTime(logLine string) string {
 	//	}
 	//}
 	//return ""
+	t, err := parseTimer(logLine)
+	if err == nil {
+		return t.Unix()
+	}
+	return 0
+}
+
+func parseTime1(logLine string) string {
 	t, err := parseTimer(logLine)
 	if err == nil {
 		return t.Format(time.DateTime)
@@ -238,7 +247,7 @@ func parseMacAddr(logLine string) string {
 	}
 	return ""
 }
-func parseSysLog(data string) (string, string, string, int) {
+func parseSysLog(data string) (int64, string, string, int) {
 	phy := parsePhy(data)
 	timestamp := parseTime(data)
 	macAddr := parseMacAddr(data)
@@ -294,7 +303,7 @@ func parseLeaseLine(line string, leasetime time.Duration) (DHCPLease, error) {
 		IP:        ip.String(),
 		MAC:       mac.String(),
 		Hostname:  hostname,
-		StartTime: startTime.Format(time.DateTime),
+		StartTime: startTime.Unix(),
 		//IsActive:  time.Now().Before(startTime.Add(time.Second * time.Duration(leaseDuration))),
 	}, nil
 }
@@ -365,9 +374,10 @@ func getClientsByArp(deviceInterfaceName string) (map[string]*ARPEntry, error) {
 		if !strings.HasSuffix(line, deviceInterfaceName) {
 			continue // 根据Device过滤
 		}
-		entry, err := parseARPLine(line)
-		if err != nil {
+		entry, e := parseARPLine(line)
+		if e != nil {
 			//return nil, err
+			glog.Error("parseARPLine error", e, line)
 			continue
 		}
 		entries[entry.MAC.String()] = entry

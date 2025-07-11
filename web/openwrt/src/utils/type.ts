@@ -1,5 +1,5 @@
 export interface Status {
-  timestamp: string
+  timestamp: number
   connected: boolean
   mac: string
 }
@@ -17,7 +17,7 @@ export interface Client {
   phy: string
   hostname: string
   nickName: string
-  starTime: string
+  starTime: number
   online: boolean
   statusList: Status[]
 }

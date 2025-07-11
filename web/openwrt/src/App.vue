@@ -93,7 +93,11 @@
             label="连接时间"
             sortable
             v-if="!isMobile()"
-          />
+          >
+            <template #default="props">
+              {{ formatTimeStamp(props.row.starTime) }}
+            </template>
+          </el-table-column>
           <el-table-column prop="online" label="状态" sortable>
             <template #default="scope">
               <el-tag v-if="scope.row.online" type="success">在线</el-tag>
@@ -116,7 +120,7 @@
                       >修改名称
                     </el-dropdown-item>
                     <el-dropdown-item @click="handleGoToTimeLineDialog(row)"
-                      >查看设备
+                      >时间表
                     </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
@@ -194,7 +198,9 @@ import {
   showTips,
   showWarmDialog,
   showWarmTips,
+  formatTimeStamp,
   xhrPromise,
+  formatToUTC8,
 } from './utils/utils.ts'
 import { EventAwareSSEClient } from './utils/sseclient.ts'
 import { ElMessageBox } from 'element-plus'
@@ -395,7 +401,9 @@ const testData = [
 ]
 
 const fetchData = () => {
-  console.log('fetchData')
+  const timestamp = 1752266198
+
+  console.log('fetchData', formatToUTC8(timestamp))
   fetch(`../api/clients/get`, {
     credentials: 'include',
     method: 'GET',

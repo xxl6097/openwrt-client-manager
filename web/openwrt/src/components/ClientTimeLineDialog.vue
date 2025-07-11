@@ -14,7 +14,7 @@
           :key="index"
           :color="activity.connected ? '#55f604' : 'red'"
           :hollow="false"
-          :timestamp="activity.timestamp"
+          :timestamp="formatToUTC8(activity.timestamp)"
         >
           <span :style="{ color: activity.connected ? '#55f604' : 'red' }">
             {{ activity.connected ? '在线' : '离线' }}
@@ -28,7 +28,12 @@
 <script setup lang="ts">
 import { ref, defineExpose } from 'vue'
 import { Client, Status } from '../utils/type.ts'
-import { isMobile, showErrorTips, showTips } from '../utils/utils.ts'
+import {
+  formatToUTC8,
+  isMobile,
+  showErrorTips,
+  showTips,
+} from '../utils/utils.ts'
 
 const showClientDialog = ref(false)
 const title = ref<string>()
