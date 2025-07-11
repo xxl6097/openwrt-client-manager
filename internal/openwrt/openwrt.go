@@ -88,7 +88,7 @@ func (this *openWRT) listenFsnotify(watcher *fsnotify.Watcher) {
 			glog.Println("event:", event)
 			if event.Has(fsnotify.Write) {
 				//filePath := event.Name
-				if strings.Compare(strings.ToLower(event.Name), strings.ToLower(dhcpFilePath)) == 0 {
+				if strings.Compare(strings.ToLower(event.Name), strings.ToLower(dhcpLeasesFilePath)) == 0 {
 					this.updateClientsByDHCP()
 				}
 				if this.fnWatcher != nil {
@@ -111,7 +111,7 @@ func (this *openWRT) initListenFsnotify() {
 	}
 	go this.listenFsnotify(watcher)
 	// Add a path.
-	err = watcher.Add(dhcpFilePath)
+	err = watcher.Add(dhcpLeasesFilePath)
 	//err = watcher.Add(arpFilePath)
 	if err != nil {
 		glog.Error(fmt.Errorf("watcher add err %v", err))
@@ -341,4 +341,15 @@ func (this *openWRT) Nick(obj *DHCPLease) error {
 
 func (this *openWRT) GetDeviceStatusList(mac string) []*Status {
 	return getStatusByMac(mac)
+}
+func (this *openWRT) DeleteStaticIp(mac string) error {
+	return deleteStaticIpAddress(mac)
+}
+
+func (this *openWRT) GetStaticIps() ([]*DHCPHost, error) {
+	return GetUCIOutput()
+}
+
+func (this *openWRT) SetStaticIp(mac, ip, name string) error {
+	return setStaticIpAddress(mac, ip, name)
 }

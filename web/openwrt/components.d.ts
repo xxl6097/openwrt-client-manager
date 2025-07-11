@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    ClientStaticIpSettingDialog: typeof import('./src/components/ClientStaticIpSettingDialog.vue')['default']
     ClientTimeLineDialog: typeof import('./src/components/ClientTimeLineDialog.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElDialog: typeof import('element-plus/es')['ElDialog']
@@ -26,6 +27,7 @@ declare module 'vue' {
     ElTimeline: typeof import('element-plus/es')['ElTimeline']
     ElTimelineItem: typeof import('element-plus/es')['ElTimelineItem']
     ElUpload: typeof import('element-plus/es')['ElUpload']
+    StaticIpListDialog: typeof import('./src/components/StaticIpListDialog.vue')['default']
     UpgradeDialog: typeof import('./src/components/expand/UpgradeDialog.vue')['default']
     ViewExpand: typeof import('./src/components/expand/ViewExpand.vue')['default']
   }

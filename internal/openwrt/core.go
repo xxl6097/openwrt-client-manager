@@ -20,7 +20,7 @@ import (
 var (
 	nickFilePath          = "/usr/local/nick"
 	arpFilePath           = "/proc/net/arp"
-	dhcpFilePath          = "/tmp/dhcp.leases"
+	dhcpLeasesFilePath    = "/tmp/dhcp.leases"
 	dhcpCfgFilePath       = "/etc/config/dhcp"
 	brLanString           = "br-lan"
 	apStaDisConnectString = "AP-STA-DISCONNECTED"
@@ -167,6 +167,9 @@ func parseARPLine(line string) (*ARPEntry, error) {
 	mac, err := net.ParseMAC(fields[3])
 	if err != nil {
 		return nil, fmt.Errorf("invalid MAC: %v", err)
+	}
+	if mac.String() == "00:00:00:00:00:00" {
+		return nil, fmt.Errorf("error MAC")
 	}
 
 	return &ARPEntry{
@@ -364,7 +367,8 @@ func getClientsByArp(deviceInterfaceName string) (map[string]*ARPEntry, error) {
 		}
 		entry, err := parseARPLine(line)
 		if err != nil {
-			return nil, err
+			//return nil, err
+			continue
 		}
 		entries[entry.MAC.String()] = entry
 	}
@@ -425,7 +429,7 @@ func parseDHCPLeases(filePath string) (map[string]*DHCPLease, error) {
 }
 
 func getClientsByDhcp() (map[string]*DHCPLease, error) {
-	return parseDHCPLeases(dhcpFilePath)
+	return parseDHCPLeases(dhcpLeasesFilePath)
 }
 
 func parseTimer(logLine string) (*time.Time, error) {

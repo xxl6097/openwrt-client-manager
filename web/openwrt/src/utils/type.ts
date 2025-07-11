@@ -4,6 +4,13 @@ export interface Status {
   mac: string
 }
 
+export interface DHCPHost {
+  index: string
+  hostname: string
+  mac: string
+  ip: string
+}
+
 export interface Client {
   ip: string
   mac: string

@@ -24,6 +24,9 @@
                 <el-dropdown-item @click="handleClearData"
                   >清空数据
                 </el-dropdown-item>
+                <el-dropdown-item @click="handleShowStaticIpListDialog"
+                  >查看静态IP列表
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -50,14 +53,18 @@
           style="width: 100%"
           :border="true"
           :preserve-expanded-content="true"
-          :cell-style="{ padding: mobileLayout ? '4px' : '8px' }"
         >
           <el-table-column type="expand">
             <template #default="props">
               <ViewExpand :row="props.row" />
             </template>
           </el-table-column>
-          <el-table-column prop="hostname" label="名称" sortable>
+          <el-table-column
+            prop="hostname"
+            label="名称"
+            sortable
+            v-if="!isMobile()"
+          >
             <template #default="scope">
               {{
                 scope.row.nickName === ''
@@ -68,9 +75,19 @@
               }}
             </template>
           </el-table-column>
-          <el-table-column prop="ip" label="IP地址" sortable />
-          <el-table-column prop="mac" label="Mac地址" sortable />
-          <el-table-column prop="starTime" label="连接时间" sortable />
+          <el-table-column prop="ip" label="IP" sortable />
+          <el-table-column
+            prop="mac"
+            label="Mac地址"
+            sortable
+            v-if="!isMobile()"
+          />
+          <el-table-column
+            prop="starTime"
+            label="连接时间"
+            sortable
+            v-if="!isMobile()"
+          />
           <el-table-column prop="online" label="状态" sortable>
             <template #default="scope">
               <el-tag v-if="scope.row.online" type="success">在线</el-tag>
@@ -80,9 +97,15 @@
           <el-table-column label="操作">
             <template #default="{ row }">
               <el-dropdown trigger="click">
-                <el-button size="small" type="text">功能操作</el-button>
+                <el-button size="small" type="text">操作</el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
+                    <el-dropdown-item @click="handleShowStaitcIpDialog(row)"
+                      >设置静态IP
+                    </el-dropdown-item>
+                    <el-dropdown-item @click="handleDeleteStaticIp(row)"
+                      >删除静态IP
+                    </el-dropdown-item>
                     <el-dropdown-item @click="handleChangeNickName(row)"
                       >修改名称
                     </el-dropdown-item>
@@ -146,6 +169,8 @@
     </template>
   </el-dialog>
 
+  <StaticIpListDialog ref="staticIpListDialogRef" />
+  <ClientStaticIpSettingDialog ref="clientStaticIpDialogRef" />
   <UpgradeDialog ref="upgradeRef" />
   <ClientTimeLineDialog ref="clientTimeLineDialogRef" />
 </template>
@@ -156,6 +181,7 @@ import { useDark, useToggle } from '@vueuse/core'
 import { Client } from './utils/type.ts'
 import ClientTimeLineDialog from './components/ClientTimeLineDialog.vue'
 import {
+  isMobile,
   showErrorTips,
   showLoading,
   showSucessTips,
@@ -168,11 +194,19 @@ import { EventAwareSSEClient } from './utils/sseclient.ts'
 import { ElMessageBox } from 'element-plus'
 import ViewExpand from './components/expand/ViewExpand.vue'
 import UpgradeDialog from './components/expand/UpgradeDialog.vue'
+import ClientStaticIpSettingDialog from './components/ClientStaticIpSettingDialog.vue'
+import StaticIpListDialog from './components/StaticIpListDialog.vue'
 
 const title = ref<string>('客户端列表')
 const clientTimeLineDialogRef = ref<InstanceType<
   typeof ClientTimeLineDialog
 > | null>(null)
+const clientStaticIpDialogRef = ref<InstanceType<
+  typeof ClientStaticIpSettingDialog
+> | null>(null)
+const staticIpListDialogRef = ref<InstanceType<typeof StaticIpListDialog> | null>(
+  null,
+)
 
 const manusForm = ref({
   show: false,
@@ -315,6 +349,45 @@ const handleUpdate = () => {
   }
 }
 
+const testData = [
+  {
+    ip: '192.168.0.199',
+    mac: 'ea:e6:51:97:81:f6',
+    phy: 'phy1-ap0',
+    hostname: '*',
+    nickName: 'MacBookAirM4',
+    starTime: '2025-07-11 09:47:33',
+    online: true,
+  },
+  {
+    ip: '192.168.0.3',
+    mac: '8c:ec:4b:58:81:09',
+    phy: '',
+    hostname: 'DESKTOP-76N54N2',
+    nickName: '',
+    starTime: '2025-07-11 08:03:36',
+    online: true,
+  },
+  {
+    ip: '192.168.0.6',
+    mac: '7a:34:62:d5:a4:18',
+    phy: 'phy1-ap0',
+    hostname: 'Xiaomi-15',
+    nickName: '小米15',
+    starTime: '2025-07-11 09:47:27',
+    online: true,
+  },
+  {
+    ip: '192.168.0.231',
+    mac: 'f6:d8:9e:5c:9f:0a',
+    phy: 'phy0-ap0',
+    hostname: '',
+    nickName: '',
+    starTime: '',
+    online: false,
+  },
+]
+
 const fetchData = () => {
   console.log('fetchData')
   fetch(`../api/get/clients`, {
@@ -329,8 +402,10 @@ const fetchData = () => {
         renderTable(json.data)
       }
     })
-    .catch(() => {
-      // showErrorTips('获取服务器信息失败')
+    .catch((error) => {
+      console.error(error)
+      showErrorTips(`${JSON.stringify(error)}`)
+      renderTable(testData)
     })
 }
 
@@ -351,6 +426,37 @@ const handleClearData = () => {
     },
     () => {},
   )
+}
+
+const handleDeleteStaticIp = (row: Client) => {
+  console.log('handleDeleteStaticIp', row)
+  ElMessageBox.confirm(`确定删除【${row.hostname}】静态IP吗?`, 'Warning', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      const loader = showLoading('删除中...')
+      fetch(`../api/delete/staticip?mac=${row.mac}`, {
+        credentials: 'include',
+        method: 'DELETE',
+      })
+        .then((res) => {
+          return res.json()
+        })
+        .then((json) => {
+          console.log('handleDeleteStaticIp', json)
+          showTips(json.code, json.msg)
+        })
+        .catch((error) => {
+          console.log('error', error)
+          showErrorTips('删除失败')
+        })
+        .finally(() => {
+          loader.close()
+        })
+    })
+    .catch(() => {})
 }
 
 const handleChangeNickName = (row: Client) => {
@@ -378,6 +484,20 @@ const handleChangeNickName = (row: Client) => {
         showErrorTips('修改昵称失败')
       })
   })
+}
+
+function handleShowStaticIpListDialog() {
+  console.log('handleShowStaticIpListDialog')
+  if (staticIpListDialogRef.value) {
+    staticIpListDialogRef.value.showDialogForm()
+  }
+}
+
+const handleShowStaitcIpDialog = (row: Client) => {
+  console.log('handleShowStaitcIpDialog', row)
+  if (clientStaticIpDialogRef.value) {
+    clientStaticIpDialogRef.value.showDialogForm(row)
+  }
 }
 
 // 调整详情

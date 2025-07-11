@@ -6,8 +6,23 @@
       inline
       class="proxy-table-expand"
     >
+      <el-form-item label="名称" v-if="isMobile()">
+        <span>{{
+          row.nickName === ''
+            ? row.hostname
+            : row.hostname === '*'
+              ? row.nickName
+              : `${row.hostname}(${row.nickName})`
+        }}</span>
+      </el-form-item>
       <el-form-item label="网络接口">
         <span>{{ row.phy }}</span>
+      </el-form-item>
+      <el-form-item label="连接时间" v-if="isMobile()">
+        <span>{{ row.starTime }}</span>
+      </el-form-item>
+      <el-form-item label="Mac地址" v-if="isMobile()">
+        <span>{{ row.mac }}</span>
       </el-form-item>
     </el-form>
 
@@ -28,6 +43,8 @@
 </template>
 
 <script setup lang="ts">
+import { isMobile } from '../../utils/utils.ts'
+
 defineProps<{
   row: any
 }>()

@@ -44,6 +44,10 @@ func (this *ApiRoute) Setup(router *mux.Router) {
 		NoAuth: false,
 	})
 
+	router.HandleFunc("/api/set/staticip", this.restApi.SetStaticIp).Methods(http.MethodPost)
+	router.HandleFunc("/api/delete/staticip", this.restApi.DeleteStaticIp).Methods(http.MethodDelete)
+	router.HandleFunc("/api/get/staticips", this.restApi.GetStaticIps).Methods(http.MethodGet)
+
 	router.HandleFunc("/api/checkversion", this.restApi.ApiCheckVersion).Methods("GET")
 	router.HandleFunc("/api/upgrade", this.restApi.ApiUpdate).Methods("POST")
 	router.HandleFunc("/api/upgrade", this.restApi.ApiUpdate).Methods("PUT")
